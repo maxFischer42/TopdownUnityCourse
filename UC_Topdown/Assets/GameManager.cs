@@ -24,6 +24,9 @@ public class GameManager : MonoBehaviour
     public AudioClip goldSound;
     public AudioClip heartSound;
     public enum CollectableTypes {crystal, gold, heart}
+    public GameObject loadingScreenIcon;
+    public Animator loadingScreenAnimator;
+    public ScrollText typewriter;
 
     public static GameManager Instance { 
         get {
@@ -42,16 +45,28 @@ public class GameManager : MonoBehaviour
 
     void Start() {
         DontDestroyOnLoad(this);
+        player = GameObject.FindObjectOfType<PlayerMovement>();
+        DontDestroyOnLoad(player.gameObject);
         if(GetComponent<PauseManager>()) pauseManager = GetComponent<PauseManager>();
         OnLevelLoaded(0);
     }
 
     public void OnLevelExit(int spawnTo, string sceneToLoad) {
-        //ScreenFadeOut();
-        int currentSceneID = SceneManager.GetActiveScene().buildIndex;
-        SceneManager.LoadScene(sceneToLoad);
-        while(SceneManager.GetActiveScene().buildIndex != currentSceneID) {}
-        OnLevelLoaded(spawnTo);
+        ScreenFadeOut();
+        StartCoroutine(LoadSceneAsync(spawnTo, sceneToLoad));
+
+        
+    }
+
+    public IEnumerator LoadSceneAsync(int pos, string name) {
+        yield return new WaitForSeconds(2f);
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(name);
+        while(!asyncLoad.isDone) {
+            yield return null;
+        }
+        //SceneManager.LoadScene(sceneToLoad);
+        player.transform.Find("Jukebox").GetComponent<AudioSource>().Stop();
+        OnLevelLoaded(pos);
     }
 
     void OnLevelLoaded(int spawnPos) {
@@ -59,10 +74,10 @@ public class GameManager : MonoBehaviour
         pauseManager.OnLevelLoaded();
         pauseManager.soundSlider.value = soundVolume;
         pauseManager.musicSlider.value = musicVolume;
-        player = GameObject.FindObjectOfType<PlayerMovement>();
         currentLevelInfo = GameObject.FindObjectOfType<LevelInfo>();
         currentLevelInfo.SpawnPlayerAtLocation(spawnPos);
-        //ScreenFadeIn();
+        print("Level loaded!");
+        ScreenFadeIn();
 
         playerSpeaker = player.transform.Find("Soundbox").GetComponent<AudioSource>();
 
@@ -109,4 +124,25 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
+
+    void ScreenFadeOut() {
+        loadingScreenAnimator.gameObject.SetActive(true);
+        loadingScreenAnimator.SetTrigger("isLoading");
+        Invoke("SetLoadIconTrue", 0.5f);
+    }
+
+    void ScreenFadeIn() {
+        loadingScreenAnimator.SetTrigger("loadEnd");
+        loadingScreenIcon.SetActive(false);
+        Invoke("DisableTransition", 5f);
+    }
+
+    void DisableTransition() {
+        loadingScreenAnimator.gameObject.SetActive(false);
+    }
+
+    void SetLoadIconTrue() {
+        loadingScreenIcon.SetActive(true);
+    }
+
 }

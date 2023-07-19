@@ -96,12 +96,11 @@ GameObject:
   - component: {fileID: 576588469475608751}
   - component: {fileID: 576588469475608750}
   - component: {fileID: 576588469475608753}
-  - component: {fileID: 4120844171711097182}
   - component: {fileID: 7906127928266060047}
   - component: {fileID: 6011000139084623587}
   - component: {fileID: 4120844171711097181}
-  - component: {fileID: 1240269331593786469}
-  m_Layer: 10
+  - component: {fileID: 1648340217218061992}
+  m_Layer: 7
   m_Name: Vase
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -161,22 +160,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 7
---- !u!114 &4120844171711097182
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 576588469475608754}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 183748dd497aa473a98ff0cd8cb67fc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 1
-  uniqueID: 4127480184798177403
-  updateError: 1
-  checkTime: 0.2
 --- !u!114 &7906127928266060047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,22 +288,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deathEffect: {fileID: 1875519439248163186, guid: d6c832d6eecfa654a8ad8a41ed829eb9, type: 3}
---- !u!114 &1240269331593786469
-MonoBehaviour:
+--- !u!208 &1648340217218061992
+NavMeshObstacle:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 576588469475608754}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 183748dd497aa473a98ff0cd8cb67fc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 1
-  uniqueID: 6190610400519724536
-  updateError: 1
-  checkTime: 0.2
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &5347006404750790426
 GameObject:
   m_ObjectHideFlags: 0

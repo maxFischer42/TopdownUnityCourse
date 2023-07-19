@@ -16,6 +16,9 @@ public class LevelInfo : MonoBehaviour
     // A reference to the player gameObject in the level.
     public GameObject playerGameObject;
 
+    void Start() {
+        playerGameObject = GameObject.Find("Player");
+    }
 
     // This function will move the player gameObject to the desired spawn point
     public void SpawnPlayerAtLocation(int point) {

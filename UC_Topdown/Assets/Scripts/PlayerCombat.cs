@@ -43,6 +43,7 @@ public class PlayerCombat : MonoBehaviour
     
 
     void Update() {
+        if(Time.timeScale == 0) return;
         if(interaction.isPushing == false) {
             
             if(isAttacking) {

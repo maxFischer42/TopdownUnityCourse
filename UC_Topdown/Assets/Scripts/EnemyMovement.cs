@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pathfinding;
+using UnityEngine.AI;
 
 public class EnemyMovement : MonoBehaviour
 {
-    public enum enemyState {idle, move, chase, attack}
+    public enum enemyState {idle, move, chase}
     private enemyState state = enemyState.idle;
 
     private Animator animator;
@@ -20,9 +20,7 @@ public class EnemyMovement : MonoBehaviour
     private List<Transform> patrolPoints = new List<Transform>();
     private int currentWaypoint = 0;
 
-    public Rigidbody2D rb;
-
-    public EnemyPathfinding pathing;
+    public NavMeshAgent agent;
 
     // An effect to spawn when the player is detected by the enemy
     public GameObject notification;
@@ -41,20 +39,23 @@ public class EnemyMovement : MonoBehaviour
 
     bool playerDetected = false;
 
-    private int subPixelMeasurements = 16;
-
     public float currentSpeed;
+    public float distanceToStop = 1.5f;
+
+    public bool isIdling = false;
+    public NavMeshPathStatus status;
 
     void Start() {
         animator = transform.GetChild(0).GetComponent<Animator>();
         render = transform.GetChild(0).GetComponent<SpriteRenderer>();
-        pathing = GetComponent<EnemyPathfinding>();
+        agent = GetComponent<NavMeshAgent>();
+		agent.updateRotation = false;
+		agent.updateUpAxis = false;
         GetPatrolPoints();
-        HandleNextAction(); 
+        state = enemyState.move;
     }
 
     void GetPatrolPoints() {
-        patrolPointParent = GameObject.Find("Patrol Points").transform;
         int nodeCount = patrolPointParent.childCount;
         for(int i = 0; i < nodeCount; i++) {
             Debug.Log("Added point " + i);
@@ -63,33 +64,39 @@ public class EnemyMovement : MonoBehaviour
     }
 
     void Update() {
-        RockEnemyUpdate();
-    }
-
-    void RockEnemyUpdate() {
-        if(isThinking) return;
-        CheckForPlayer();
+        float dist = agent.remainingDistance;
+        FlipSprite(Mathf.Sign(agent.velocity.x));        
+        
         switch(state) {
             case enemyState.idle:
-
+                if(isIdling) return;
+                timeToNextAction = Random.Range(rangeBetweenActions.x, rangeBetweenActions.y);
+                isIdling = true;
+                Invoke("IdleWait", timeToNextAction);
                 break;
             case enemyState.move:       
-                currentSpeed = walkSpeed;         
-                if(pathing.reachedDestination) {
+                agent.speed = walkSpeed;
+                if(dist < agent.stoppingDistance) {
                     animator.SetBool("isMoving", false);
-                    isThinking = true;
-                    TransitionToNextAction();
+                    state = enemyState.idle;  
                 }
                 break;
             case enemyState.chase:
                 if(!isChasingPlayer) {
-                    isThinking = true;
-                    TransitionToNextAction(); 
-                    return;
+                    state = enemyState.idle;
+                } else {
+                    isIdling = false;
+                    agent.speed = chaseSpeed; 
+                    if(dist < agent.stoppingDistance) {
+                        ChasePlayer();
+                    }
                 }
-                currentSpeed = chaseSpeed; 
                 break;
         }
+    }
+
+    void FixedUpdate() {
+        CheckForPlayer();
     }
 
     void CheckForPlayer() {
@@ -120,7 +127,12 @@ public class EnemyMovement : MonoBehaviour
             isChasingPlayer = false;
             return;
         }
-        pathing.SetDestination(playerTransform);
+        ChasePlayer();
+    }
+
+    void ChasePlayer() {
+        Transform playerTransform = GameObject.Find("Player").transform;
+        agent.SetDestination(playerTransform.position);
     }
 
     void PlayerDetected() {
@@ -130,50 +142,27 @@ public class EnemyMovement : MonoBehaviour
         Destroy(n, 0.7f);
     }
 
-    void TransitionToNextAction() {
-        timeToNextAction = Random.Range(rangeBetweenActions.x, rangeBetweenActions.y);
-        Invoke("HandleNextAction", timeToNextAction);
-    }
-
-    void HandleNextAction() {
-        isThinking = false;
-        switch(state) {
-            case enemyState.idle:
-                animator.SetBool("isMoving", true);
-                while(true) {
-                    int newPoint = Random.Range(0, patrolPoints.Count - 1);
-                    if(newPoint != currentWaypoint) {
-                        pathing.SetDestination(patrolPoints[newPoint].position);
-                        currentWaypoint = newPoint;
-                        break;
-                    }
+    void IdleWait() {
+        if(state != enemyState.chase) {
+            state = enemyState.move;
+            isIdling = false;
+            animator.SetBool("isMoving", true);
+            while(true) {
+                int newPoint = Random.Range(0, patrolPoints.Count - 1);
+                if(newPoint != currentWaypoint) {
+                    agent.SetDestination(patrolPoints[newPoint].position);
+                    currentWaypoint = newPoint;
+                    break;
                 }
-                state = enemyState.move;
-                break;
-            case enemyState.move:
-                state = enemyState.idle;
-                TransitionToNextAction();
-                break;
-            case enemyState.chase:
-                TransitionToNextAction();
-                state = enemyState.idle;
-                break;
+            }
         }
     }
 
-    public void Move(Vector3 velocity) {
-       // rb.velocity = velocity * Time.fixedDeltaTime;
-        transform.position += velocity * Time.deltaTime;
-        FlipSprite(Mathf.Sign(velocity.x));
-        previousDirection = Mathf.Sign(velocity.x);
-    }   
-
     void FlipSprite(float direction) {
-        bool state = false;
-        if(direction == 0) return;
-        if(direction > 0) state = false;
-        else state = true;
-        animator.GetComponent<SpriteRenderer>().flipX = state;
+        if(previousDirection != direction) {
+            previousDirection = direction;
+            animator.GetComponent<SpriteRenderer>().flipX = !animator.GetComponent<SpriteRenderer>().flipX;
+        }
     } 
 }
 

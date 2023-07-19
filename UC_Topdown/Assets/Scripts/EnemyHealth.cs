@@ -37,6 +37,9 @@ public class EnemyHealth : MonoBehaviour
     // A reference to the effect we want to spawn when the gameobject dies
     public GameObject deathEffect;
 
+    // The counter force to be applied to slow down the knockback
+    public float counterForce;
+
     void Start() {
         // On startup, set our current health to our max health
         currentHealth = maxHealth;
@@ -135,6 +138,11 @@ public class EnemyHealth : MonoBehaviour
             currentHealth = maxHealth;
         }
         if(isKnockedBack) {
+            // Add counter force
+            // Get direction of knockback
+            Vector2 dir = rb.velocity.normalized * -1;
+            Vector2 counter = dir * counterForce;
+            rb.AddForce(counter);
             if(rb.velocity.magnitude < 0.1f) {
                 movementComponent.enabled = true;
                 isKnockedBack = false;

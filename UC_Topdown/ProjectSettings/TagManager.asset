@@ -11,6 +11,11 @@ TagManager:
   - Jukebox
   - Soundbox
   - Item
+  - Coin
+  - Mirror
+  - Player_Hitbox
+  - patrol
+  - Enemy_Hitbox
   layers:
   - Default
   - TransparentFX
@@ -23,7 +28,7 @@ TagManager:
   - Walls
   - Player
   - Enemies
-  - 
+  - Ground
   - 
   - 
   - 

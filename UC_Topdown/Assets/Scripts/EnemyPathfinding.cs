@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
-[RequireComponent(typeof(Seeker))]
 [RequireComponent(typeof(EnemyMovement))]
 public class EnemyPathfinding : MonoBehaviour
 {
@@ -88,7 +87,6 @@ public class EnemyPathfinding : MonoBehaviour
 
 
         currentVelocity = dir;
-        movement.Move(velocity);
     }
 
 
